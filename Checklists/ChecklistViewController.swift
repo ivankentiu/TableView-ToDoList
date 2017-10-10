@@ -45,9 +45,30 @@ class ChecklistViewController: UITableViewController {
         
     }
     
+    @IBAction func addItem(_ sender: Any) {
+        let newRowIndex = items.count
+        let item = ChecklistItem()
+        //item.text = "I am a new row"
+        
+        // Several default titles (at random)
+        var titles = ["Empty todo item", "Generic todo", "First todo: fill me out", "I need something to do", "Much to do about nothing"]
+        let randomNumber = arc4random_uniform(UInt32(titles.count))
+        let title = titles[Int(randomNumber)]
+        item.text = title
+        
+        item.checked = true
+        
+        items.append(item)
+        
+        let indexPath = IndexPath(row: newRowIndex, section: 0)
+        let indexPaths = [indexPath]
+        tableView.insertRows(at: indexPaths, with: .automatic)
+        
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        navigationController?.navigationBar.prefersLargeTitles = true
     }
 
     override func didReceiveMemoryWarning() {
