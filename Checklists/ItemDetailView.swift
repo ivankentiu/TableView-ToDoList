@@ -8,16 +8,31 @@
 
 import UIKit
 
-class AddItemViewController: UITableViewController, UITextFieldDelegate {
+protocol ItemDetailViewControllerDelegate: class {
+    func itemDetailViewControllerDidCancel(_ controller: ItemDetailView)
+    func itemDetailViewController(_ controller: ItemDetailView, didFinishAdding item: ChecklistItem)
+    func itemDetailViewController(_ controller: ItemDetailView, didFinishEditing item: ChecklistItem)
+}
+
+class ItemDetailView: UITableViewController, UITextFieldDelegate {
 
     @IBOutlet weak var textField: UITextField!
-    
     @IBOutlet weak var doneBarButton: UIBarButtonItem!
     @IBOutlet weak var cancelBarButton: UIBarButtonItem!
+    var itemToEdit: ChecklistItem?
+    
+    // may or not have a delegate
+    weak var delegate: ItemDetailViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.largeTitleDisplayMode = .never
+        
+        if let item = itemToEdit {
+            title = "Edit Item"
+            textField.text = item.text
+            doneBarButton.isEnabled = true
+        }
         textField.delegate = self
     }
     
@@ -32,6 +47,21 @@ class AddItemViewController: UITableViewController, UITextFieldDelegate {
 
     @IBAction func cancel(){
         navigationController?.popViewController(animated: true)
+        delegate?.itemDetailViewControllerDidCancel(self)
+    }
+    
+    @IBAction func done() {
+       
+        if let itemToEdit = itemToEdit {
+            itemToEdit.text = textField.text!
+            delegate?.itemDetailViewController(self, didFinishEditing: itemToEdit)
+        } else {
+            let item = ChecklistItem()
+            item.text = textField.text!
+            item.checked = false
+            delegate?.itemDetailViewController(self, didFinishAdding: item)
+        }
+       
     }
     
     override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
@@ -49,11 +79,6 @@ class AddItemViewController: UITableViewController, UITextFieldDelegate {
             doneBarButton.isEnabled = true
         }
         return true
-    }
-    
-    @IBAction func done() {
-        navigationController?.popViewController(animated: true)
-        print("contents of textfield: \(textField.text!)")
     }
 
 }
